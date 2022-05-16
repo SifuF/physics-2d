@@ -16,7 +16,7 @@ Usage...
 
 ```
 
-P2D can be used with any renderer of your choice, however the included demos require SFML for graphics and sound. To run, simply create an instance of chosen demo as follows:
+P2D can be used with any renderer of your choice, however the included demos require [SFML](https://www.sfml-dev.org/) for graphics and sound. To run, simply create an instance of chosen demo as follows:
 
 ```
 Planets planets;
