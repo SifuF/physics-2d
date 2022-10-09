@@ -38,3 +38,40 @@ Playground playground;
 ```
 
 ![Snooker](img/playground.gif)
+
+## Build
+#### Linux
+
+Install CMake, e.g. for Debian/Ubuntu:
+```
+sudo apt-get install build-essential libssl-dev
+sudo apt-get install cmake
+```
+Install SFML:
+```
+sudo apt-get install libsfml-dev
+```
+
+Clone repo and make a new directory called ```build``` inside the ```src```
+directory and enter it.
+```
+cd {DOWNLOAD_LOCATION}/physics-2d/src
+mkdir build
+cd build
+```
+run CMake
+```
+cmake ../
+```
+
+run make
+```
+make
+```
+Start the game:
+```
+./Physics
+```
+#### Windows
+Install [CMake](https://cmake.org/), use CMake GUI or command line to generate
+Visual Studio .sln file, then build with VS.
