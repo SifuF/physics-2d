@@ -50,8 +50,18 @@ namespace p2d {
 			return v;
 		}
 
+		[[nodiscard]] float angle(const Vec2f& v) const {
+			float dot = this->dot(v);
+			float det = this->det(v);
+			return{ (180.0f / 3.14159f) * atan2(det, dot) };
+		}
+
 		[[nodiscard]] float dot(const Vec2f& v) const {
 			return{ x * v.x + y * v.y };
+		}
+
+		[[nodiscard]] float det(const Vec2f& v) const {
+			return{ x * v.y - y * v.x };
 		}
 
 		[[nodiscard]] float distance(const Vec2f& v) const {

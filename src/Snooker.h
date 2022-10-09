@@ -2,6 +2,7 @@
 #define SNOOKER_H
 
 //#define GRAPHICS
+#define USE_CUE
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
@@ -76,6 +77,8 @@ private:
 	static constexpr int PINK = 19;
 	static constexpr int BLACK = 20;
 	static constexpr int WHITE = 21;
+
+	bool waiting = false;
 
 public:
 
@@ -258,7 +261,7 @@ public:
 			physics.add(&b);
 		}
 		physics.setGravity({ 0.0f, 0.0f });
-		physics.setDrag({ 0.0f, 0.0f });
+		physics.setDrag({ 0.2f, 0.0001f });
 		physics.setOnCollision(onCollision);
 
 		mouse.init(&window, &physics, screenWidth, screenHeight);
@@ -374,13 +377,15 @@ public:
 	void update(double dt) {
 		
 		if (physics.atRest()) {
-			//mouse.setImpulseReady();
+			mouse.setImpulseReady();
 			textLeft.setString("READY");
 			textLeft.setFillColor(sf::Color::Green);
+			waiting = false;
 		}
 		else {
 			textLeft.setString("WAIT...");
 			textLeft.setFillColor(sf::Color::Red);
+			waiting = true;
 		}
 
 		updateTextNumber("SCORE ", points);
@@ -437,7 +442,26 @@ public:
 		}
 		*/
 
-		window.draw(cueShape);
+		if (!waiting && mouse.chargingCue()) {
+#ifdef USE_CUE
+			p2d::Vec2f cuePos = mouse.getCuePosition();
+			p2d::Vec2f ballPos = mouse.getBodyPosition();
+
+			float angle = (cuePos - ballPos).angle({ -1.0f, 0.0f });
+			cueShape.setRotation(-angle);
+			cueShape.setPosition(cuePos.x, cuePos.y);
+			std::cout << angle << std::endl;
+		
+			window.draw(cueShape);
+#else
+			sf::VertexArray lines(sf::LinesStrip, 2);
+			lines[0].position = { mouse.getCuePosition().x, mouse.getCuePosition().y };
+			lines[1].position = { mouse.getBodyPosition().x, mouse.getBodyPosition().y };
+
+			window.draw(lines);
+#endif
+		}
+
 		window.draw(textLeft);
 		window.draw(textRight);
 	}

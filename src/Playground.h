@@ -48,8 +48,9 @@ public:
 
 		window.create(sf::VideoMode(screenWidth, screenHeight), "SifuF Planets");
 
-		//physics.setGravity({ 0.0f, 0.0f });
-		//physics.setDrag({ 0.0f, 0.0f });
+		physics.setGravity({ 0.0f, 100.0f });
+		physics.setDrag({ 0.05f, 0.001f });
+		physics.setDragRotational({ 0.01f, 0.01f });
 
 		mouse.init(&window, &physics, screenWidth, screenHeight);
 
@@ -176,6 +177,7 @@ public:
 
 			draw();
 
+			mouse.setImpulseReady();
 			mouse.update();
 			physics.update(dt);
 		}
@@ -222,6 +224,14 @@ public:
 		shape_bottom.setPosition(body_bottom.getPosition().x, body_bottom.getPosition().y);
 		shape_bottom.setRotation(body_bottom.getTheta());
 		window.draw(shape_bottom);
+
+		if (mouse.chargingCue()) {
+			sf::VertexArray lines(sf::LinesStrip, 2);
+			lines[0].position = { mouse.getCuePosition().x, mouse.getCuePosition().y };
+			lines[1].position = { mouse.getBodyPosition().x, mouse.getBodyPosition().y };
+
+			window.draw(lines);
+		}
 	
 		window.display();
 	}

@@ -12,8 +12,12 @@
 		std::vector<p2d::Body*> m_Body;
 		
 		p2d::Body* m_ob_impulse;
+		p2d::Vec2f cuePosition;
 		bool impulse = false;
-		bool impulseApplied = false;
+		bool impulseApplied = true;
+
+		//external app needs to allow impulses
+		bool impulseReady = false;
 
 	public:
 
@@ -75,6 +79,9 @@
 					}
 
 					else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+						if (!impulseReady || o->isStatic()) {
+							continue;
+						}
 						impulse = true;
 						impulseApplied = false;
 						selectImpulse(o);
@@ -96,26 +103,41 @@
 			m_ob_impulse = ob;
 		}
 
+		void setImpulseReady() {
+			impulseReady = true;
+		}
+
 		void processImpulse() {
-			if (m_ob_impulse == nullptr) {
-				return;
-			}
 			if (impulse) {
+				//Right mouse button is being held down
 				position = sf::Mouse::getPosition(*window);
 				p2d::Vec2f pos = { float(position.x), float(position.y) };
-				//m_ob_impulse->setLine3(pos, true);
-				//m_ob_impulse->setLine3({200.0f, 200.0f}, true);
+				cuePosition = pos;
+			}
+			else if (!impulseApplied) {
+				//Right mouse botton has been held and now just released
+				impulseApplied = true;
+				p2d::Vec2f impulseDir = (m_ob_impulse->getPosition() - cuePosition).normalise();
+				float impulseMag = (m_ob_impulse->getPosition() - cuePosition).magnitude();
+				m_ob_impulse->setVelocity(impulseDir * impulseMag);
+				impulseReady = false;
+			}
+		}
+
+		bool chargingCue() {
+			return impulse;
+		}
+
+		p2d::Vec2f getCuePosition() {
+			return cuePosition;
+		}
+
+		p2d::Vec2f getBodyPosition() {
+			if (m_ob_impulse != nullptr) {
+				return m_ob_impulse->getPosition();
 			}
 			else {
-				if (!impulseApplied) {
-					impulseApplied = true;
-					//p2d::Vec2f v1 = m_ob_impulse->getLine3();
-					//p2d::Vec2f v0 = m_ob_impulse->getPosition();
-					//p2d::Vec2f dir = (v0 - v1).normalise();
-					//float mag = (v0 - v1).magnitude()*0.25f;
-					//m_ob_impulse->setVelocity(dir * mag);
-					//m_ob_impulse->setLine3({ 0.0f, 0.0f }, false);
-				}
+				return { 500.0f, 500.0f };
 			}
 		}
 	};
