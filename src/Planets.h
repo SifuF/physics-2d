@@ -35,7 +35,7 @@ private:
 public:
 	Planets() {
 
-		srand(unsigned int (time(NULL)));
+		srand(time(NULL));
 
 		window.create(sf::VideoMode(screenWidth, screenHeight), "SifuF Planets");
 
@@ -44,7 +44,7 @@ public:
 
 		mouse.init(&window, &physics, screenWidth, screenHeight);
 
-		for (int i = 0; i < 5000; i++) {
+		for (int i = 0; i < 1000; i++) {
 			sf::CircleShape shape(3.0f);
 			shape.setFillColor(randColor());
 			shape.setOrigin(shape.getRadius(), shape.getRadius());

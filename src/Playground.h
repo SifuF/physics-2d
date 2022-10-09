@@ -44,7 +44,7 @@ private:
 public:
 	Playground() {
 
-		srand(unsigned int(time(NULL)));
+		srand(time(NULL));
 
 		window.create(sf::VideoMode(screenWidth, screenHeight), "SifuF Planets");
 
