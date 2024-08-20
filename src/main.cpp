@@ -1,11 +1,11 @@
 
-#include "Planets.h"
-#include "Playground.h"
-#include "Snooker.h"
+#include "Planets.hpp"
+#include "Playground.hpp"
+#include "Snooker.hpp"
 
 int main()
 {
-    //Planets planets;
+    Planets planets;
     Playground playground;
     //Snooker snooker;
 
