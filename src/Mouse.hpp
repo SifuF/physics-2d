@@ -68,7 +68,7 @@
 
 				if (condition) {
 
-					if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
+					if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Left)) {
 						if (o->isCircle()) {
 							o->setPosition(pos);
 						}
@@ -78,7 +78,7 @@
 						o->setVelocity({ 0.0f, 0.0f });
 					}
 
-					else if (sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+					else if (sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)) {
 						if (!impulseReady || o->isStatic()) {
 							continue;
 						}
@@ -92,7 +92,7 @@
 				}
 			}
 
-			if (!sf::Mouse::isButtonPressed(sf::Mouse::Right)) {
+			if (!sf::Mouse::isButtonPressed(sf::Mouse::Button::Right)) {
 				impulse = false;	
 			}
 

@@ -10,10 +10,12 @@
 #include "Physics.hpp"
 #include "Mouse.hpp"
 
+#include <optional>
+
 class Snooker {
 private:
-	const int screenWidth = 1920;
-	const int screenHeight = 1080;
+	unsigned int screenWidth = 1920;
+	unsigned int screenHeight = 1080;
 	sf::RenderWindow window;
 	p2d::Physics physics;
 	Mouse mouse;
@@ -63,9 +65,9 @@ private:
 	int goes = 0;
 
 	sf::SoundBuffer bufferCollide;
-	sf::Sound soundCollide;
-	sf::Text textLeft;
-	sf::Text textRight;
+	std::optional <sf::Sound> soundCollide;
+	std::optional<sf::Text> textLeft;
+	std::optional<sf::Text> textRight;
 	sf::Font font;
 
 	static constexpr int RED = 14;
@@ -83,7 +85,7 @@ public:
 
 	Snooker() {
 
-		window.create(sf::VideoMode(screenWidth, screenHeight), "SifuF Snooker");
+		window.create(sf::VideoMode({ screenWidth, screenHeight }), "SifuF Snooker");
 
 		tableGap = float(screenWidth) / 10.0f;
 		tableWidth = float(screenWidth) - tableGap;
@@ -159,7 +161,7 @@ public:
 			sf::CircleShape s;
 			ball_shape.push_back(s);
 			ball_shape[i].setRadius(radius);
-			ball_shape[i].setOrigin(radius, radius);
+			ball_shape[i].setOrigin({ radius, radius });
 			p2d::CircleBody b;
 			ball_body.push_back(b);
 			ball_body[i].create(radius, ball_pos[i].x, ball_pos[i].y, 1.0f, 0.90f);
@@ -221,7 +223,7 @@ public:
 				wall_shape[i].setSize({ horizontalWallSize.x, horizontalWallSize.y });
 				wall_body[i].create(horizontalWallSize.x, horizontalWallSize.y, wall_pos[i].x, wall_pos[i].y, 1000.0f, 0.8f, true);
 			}
-			wall_shape[i].setOrigin(wall_shape[i].getSize().x / 2.0f, wall_shape[i].getSize().y / 2.0f);
+			wall_shape[i].setOrigin({ wall_shape[i].getSize().x / 2.0f, wall_shape[i].getSize().y / 2.0f });
 			wall_shape[i].setFillColor(GreenMid);
 		}
 
@@ -230,7 +232,7 @@ public:
 			sf::CircleShape s;
 			capsule_shape.push_back(s);
 			capsule_shape[i].setRadius(wallThickness / 2.0f);
-			capsule_shape[i].setOrigin(capsule_shape[i].getRadius(), capsule_shape[i].getRadius());
+			capsule_shape[i].setOrigin({ capsule_shape[i].getRadius(), capsule_shape[i].getRadius() });
 			capsule_shape[i].setFillColor(GreenMid);
 
 			p2d::CircleBody b;
@@ -266,8 +268,10 @@ public:
 		mouse.init(&window, &physics, screenWidth, screenHeight);
 		mouse.add(&ball_body[21]);
 
-		bufferCollide.loadFromFile("sound/collide.wav");
-		soundCollide.setBuffer(bufferCollide);
+		if (!bufferCollide.loadFromFile("sound/collide.wav")) {
+			throw std::runtime_error("Cannot open wav file");
+		}
+		soundCollide.emplace(bufferCollide);
 
 		initText();
 
@@ -276,35 +280,33 @@ public:
 
 	void initText() {
 
-		if (!font.loadFromFile("fonts/arial.ttf")) {
+		if (!font.openFromFile("fonts/arial.ttf")) {
 			std::cout << "Cannot load font!" << std::endl;
 		}
 
-		textLeft.setFont(font);
-		textLeft.setString("READY");
-		textLeft.setCharacterSize(24);
-		textLeft.setFillColor(sf::Color::Green);
-		textLeft.setStyle(sf::Text::Bold);
-		textLeft.setScale(3.0f, 3.0f);
-		textLeft.setPosition(tablePos.x, tablePos.y + tableHeight);
+		textLeft.emplace(font, "READY");
+		textLeft->setCharacterSize(24);
+		textLeft->setFillColor(sf::Color::Green);
+		textLeft->setStyle(sf::Text::Bold);
+		textLeft->setScale({ 3.0f, 3.0f });
+		textLeft->setPosition({ tablePos.x, tablePos.y + tableHeight });
 
-		textRight.setFont(font);
-		textRight.setString("SCORE 0");
-		textRight.setCharacterSize(24);
-		textRight.setFillColor(sf::Color::Green);
-		textRight.setStyle(sf::Text::Bold);
-		textRight.setScale(3.0f, 3.0f);
-		textRight.setPosition(tablePos.x + tableWidth - textRight.getGlobalBounds().width, tablePos.y + tableHeight);
+		textRight.emplace(font, "SCORE 0");
+		textRight->setCharacterSize(24);
+		textRight->setFillColor(sf::Color::Green);
+		textRight->setStyle(sf::Text::Bold);
+		textRight->setScale({ 3.0f, 3.0f });
+		textRight->setPosition({ tablePos.x + tableWidth - textRight->getGlobalBounds().size.x, tablePos.y + tableHeight });
 	}
 	
 	void updateText(std::string str) {
-		textLeft.setString(str);
+		textLeft->setString(str);
 	}
 
 	void updateTextNumber(std::string str, int data) {
 		std::string s = std::to_string(data);
-		textRight.setString(str + s);
-		textRight.setPosition(tablePos.x + tableWidth - textRight.getGlobalBounds().width, tablePos.y + tableHeight);
+		textRight->setString(str + s);
+		textRight->setPosition({ tablePos.x + tableWidth - textRight->getGlobalBounds().size.x, tablePos.y + tableHeight });
 	}
 
 	void resetTable() {
@@ -377,13 +379,13 @@ public:
 		
 		if (physics.atRest()) {
 			mouse.setImpulseReady();
-			textLeft.setString("READY");
-			textLeft.setFillColor(sf::Color::Green);
+			textLeft->setString("READY");
+			textLeft->setFillColor(sf::Color::Green);
 			waiting = false;
 		}
 		else {
-			textLeft.setString("WAIT...");
-			textLeft.setFillColor(sf::Color::Red);
+			textLeft->setString("WAIT...");
+			textLeft->setFillColor(sf::Color::Red);
 			waiting = true;
 		}
 
@@ -391,7 +393,7 @@ public:
 
 		gameLogic();
 		if (physics.collisionCheck()) {
-		    soundCollide.play();
+		    soundCollide->play();
 		}
 		physics.update(dt);
 		mouse.update();
@@ -425,7 +427,7 @@ public:
 		window.draw(table);
 
 		for (int i = 0; i < 22; i++) {
-			ball_shape[i].setPosition(ball_body[i].getPosition().x, ball_body[i].getPosition().y);
+			ball_shape[i].setPosition({ ball_body[i].getPosition().x, ball_body[i].getPosition().y });
 			window.draw(ball_shape[i]);
 		}
 
@@ -447,8 +449,8 @@ public:
 			p2d::Vec2f ballPos = mouse.getBodyPosition();
 
 			float angle = (cuePos - ballPos).angle({ -1.0f, 0.0f });
-			cueShape.setRotation(-angle);
-			cueShape.setPosition(cuePos.x, cuePos.y);
+			cueShape.setRotation(sf::degrees(-angle)); //TODO - check this
+			cueShape.setPosition({ cuePos.x, cuePos.y });
 			std::cout << angle << std::endl;
 		
 			window.draw(cueShape);
@@ -461,8 +463,8 @@ public:
 #endif
 		}
 
-		window.draw(textLeft);
-		window.draw(textRight);
+		window.draw(textLeft.value());
+		window.draw(textRight.value());
 	}
 
 	static void onCollision() {
@@ -474,21 +476,21 @@ public:
 		sf::Music music;
 		if (!music.openFromFile("sound/music.ogg"))
 			std::cout << "Cannot open music.ogg" << std::endl;
-		music.setLoop(true);
+		// music.setLoop(true); // TODO
 		music.play();
 
 		auto timePrev = std::chrono::steady_clock::now();
 
 		while (window.isOpen()) {
-
-			sf::Event event;
-			while (window.pollEvent(event)) {
-				if (event.type == sf::Event::Closed)
+			while (const std::optional event = window.pollEvent()) {
+				if (event->is<sf::Event::Closed>() ||
+					(event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape)) {
 					window.close();
-			}
+				}
 
-			if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
-				resetTable();
+				if (event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::R) {
+				    resetTable();
+			    }
 			}
 
 			window.clear();
@@ -502,7 +504,6 @@ public:
 			draw();
 
 			window.display();
-
 		}
 	}
 

@@ -2,9 +2,11 @@
 #define PLANETS_H
 
 #include <SFML/Graphics.hpp>
-#include <chrono>
+
 #include "Physics.hpp"
 #include "Mouse.hpp"
+
+#include <chrono>
 
 class Planets {
 private:
@@ -20,15 +22,15 @@ private:
 	p2d::Physics physics;
 	Mouse mouse;
 
-	int screenWidth = 1000;
-	int screenHeight = 1000;
+	unsigned int screenWidth = 1000;
+	unsigned int screenHeight = 1000;
 	sf::RenderWindow window;
 public:
 	Planets() {
 
 		srand(time(NULL));
 
-		window.create(sf::VideoMode(screenWidth, screenHeight), "SifuF Planets");
+		window.create(sf::VideoMode({ screenWidth, screenHeight }), "SifuF Planets");
 
 		physics.setGravity({ 0.0f, 0.0f });
 		physics.setDrag({ 0.0f, 0.0f });
@@ -38,7 +40,7 @@ public:
 		for (int i = 0; i < 1000; i++) {
 			sf::CircleShape shape(3.0f);
 			shape.setFillColor(randColor());
-			shape.setOrigin(shape.getRadius(), shape.getRadius());
+			shape.setOrigin({ shape.getRadius(), shape.getRadius() });
 			v_circ_shape.push_back(shape);
 
 			p2d::CircleBody body(shape.getRadius(), randPos(), randPos(), 1.0f, 0.90f);
@@ -53,7 +55,7 @@ public:
 		}
 
 		shape_sun.setRadius(75.0f);
-		shape_sun.setOrigin(shape_sun.getRadius(), shape_sun.getRadius());
+		shape_sun.setOrigin({ shape_sun.getRadius(), shape_sun.getRadius() });
 		shape_sun.setFillColor(sf::Color::Yellow);
 		body_sun.create(75.0f, 500.0f, 300.0f, 1000.0f, 0.75f, true);
 		physics.add(&body_sun);
@@ -98,11 +100,11 @@ public:
 		
 		while (window.isOpen())
 		{
-			sf::Event event;
-			while (window.pollEvent(event))
-			{
-				if (event.type == sf::Event::Closed)
+			while (const std::optional event = window.pollEvent()) {
+				if (event->is<sf::Event::Closed>() ||
+					(event->is<sf::Event::KeyPressed>() && event->getIf<sf::Event::KeyPressed>()->code == sf::Keyboard::Key::Escape)) {
 					window.close();
+				}
 			}
 
 			window.clear();
@@ -126,12 +128,12 @@ public:
 	void draw() {
 		for (int i = 0; i < v_circ_shape.size(); i++) {
 			v_circ_shape[i].setPosition({ v_circ_body[i].getPosition().x, v_circ_body[i].getPosition().y });
-			v_circ_shape[i].setRotation( v_circ_body[i].getTheta() );
+			v_circ_shape[i].setRotation(sf::degrees(v_circ_body[i].getTheta()));
 			window.draw( v_circ_shape[i] );
 		}
 		
-		shape_sun.setPosition(body_sun.getPosition().x, body_sun.getPosition().y);
-		shape_sun.setRotation(body_sun.getTheta());
+		shape_sun.setPosition({ body_sun.getPosition().x, body_sun.getPosition().y });
+		shape_sun.setRotation(sf::degrees(body_sun.getTheta()));
 		window.draw(shape_sun);
 		window.display();
 	}

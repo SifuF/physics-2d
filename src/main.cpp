@@ -5,9 +5,9 @@
 
 int main()
 {
-    Planets planets;
-    Playground playground;
-    //Snooker snooker;
+    //Planets planets;
+    //Playground playground;
+    Snooker snooker;
 
     return 0;
 }
