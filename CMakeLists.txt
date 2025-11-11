@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 configure_file(PhysicsConfig.h.in PhysicsConfig.h)
 
+add_subdirectory("${CMAKE_SOURCE_DIR}/submodules/SFML")
+
 set(SOURCE
    ${SOURCE}
    ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
@@ -28,19 +30,8 @@ set_target_properties(Physics PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS"
 endif() 
 
 target_include_directories(Physics PUBLIC
-    "${PROJECT_BINARY_DIR}"
-    "${PROJECT_BINARY_DIR}/src"
+    "${CMAKE_SOURCE_DIR}/submodules/SFML/include"
 )
-
-if(WIN32)
-target_include_directories(Physics PUBLIC
-    "${PROJECT_SOURCE_DIR}/thirdparty/SFML/include"
-)
-
-target_link_directories(Physics PUBLIC
-    "${PROJECT_SOURCE_DIR}/thirdparty/SFML/lib"
-)
-endif() 
 
 target_link_libraries(Physics PUBLIC
     optimized sfml-graphics
@@ -64,15 +55,3 @@ endif()
 configure_file("${PROJECT_SOURCE_DIR}/fonts/arial.ttf" "${PROJECT_BINARY_DIR}/fonts/arial.ttf" COPYONLY)
 file(COPY ${PROJECT_SOURCE_DIR}/sound/ DESTINATION ${PROJECT_BINARY_DIR}/sound/)
 file(COPY ${PROJECT_SOURCE_DIR}/gfx/ DESTINATION ${PROJECT_BINARY_DIR}/gfx/)
-if(WIN32)
-file(COPY ${PROJECT_SOURCE_DIR}/thirdparty/SFML/bin/ DESTINATION ${PROJECT_BINARY_DIR})
-endif() 
-
-#install(TARGETS Physics DESTINATION bin)
-#install(FILES "${PROJECT_SOURCE_DIR}/fonts/arial.ttf" DESTINATION bin/fonts)
-#install(DIRECTORY "${PROJECT_SOURCE_DIR}/sound/" DESTINATION bin/sound)
-#install(DIRECTORY "${PROJECT_SOURCE_DIR}/gfx/" DESTINATION bin/gfx)
-#if(WIN32)
-#install(DIRECTORY "${PROJECT_SOURCE_DIR}/thirdparty/SFML/bin/" DESTINATION bin/thirdparty)
-#endif()
-
